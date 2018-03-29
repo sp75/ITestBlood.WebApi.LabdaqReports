@@ -124,6 +124,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helper.cs" />
     <Compile Include="LabdaqData\Models\DISTRICTS.cs" />
     <Compile Include="LabdaqData\Models\DOCTORS.cs" />
     <Compile Include="LabdaqData\Models\DOCTOR_DETAILS.cs" />
@@ -160,19 +161,23 @@
     <Compile Include="Models\DrugTableData.cs" />
     <Compile Include="Models\EventData.cs" />
     <Compile Include="Models\OrderInfoView.cs" />
+    <Compile Include="Models\OrderStatusView.cs" />
     <Compile Include="MsSqlImplementation\DrugPanelsMsSql.cs" />
     <Compile Include="MsSqlImplementation\OrderInfoMsSQL.cs" />
+    <Compile Include="MsSqlImplementation\OrderStatusMsSql.cs" />
     <Compile Include="MsSqlImplementation\PreviousResultsMsSql.cs" />
     <Compile Include="MsSqlImplementation\PriorHistoryTestsMsSql.cs" />
     <Compile Include="MsSqlImplementation\TestEvensMsSql.cs" />
     <Compile Include="MsSqlImplementation\TestResultsMsSql.cs" />
     <Compile Include="OracleImplementation\DrugPanels.cs" />
     <Compile Include="OracleImplementation\OrderInfo.cs" />
+    <Compile Include="OracleImplementation\OrderStatus.cs" />
     <Compile Include="OracleImplementation\PreviousResults.cs" />
     <Compile Include="OracleImplementation\PriorHistoryTests.cs" />
     <Compile Include="OracleImplementation\TestEvens.cs" />
     <Compile Include="OracleImplementation\TestResults.cs" />
-    <Compile Include="Responses\OrderReportRepository.cs" />
+    <Compile Include="Responses\OrderReportOracleRepository.cs" />
+    <Compile Include="Responses\OrderReportMsSqlRepository.cs" />
     <Compile Include="Models\OrderResultData.cs" />
     <Compile Include="Models\PanelResultData.cs" />
     <Compile Include="Models\ResultTypeData.cs" />

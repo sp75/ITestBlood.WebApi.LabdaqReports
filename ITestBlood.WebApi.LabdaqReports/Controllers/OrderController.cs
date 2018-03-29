@@ -7,25 +7,33 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using ITestBlood.WebApi.LabdaqReports.Responses;
+using System.Configuration;
+using ITestBlood.WebApi.LabdaqReports.OracleImplementation;
+using ITestBlood.WebApi.LabdaqReports.MsSqlImplementation;
 
 namespace ITestBlood.WebApi.LabdaqReports.Controllers
 {
     [RoutePrefix("api/labdaq")]
     public class OrderController : ApiController
     {
+        private bool is_oracle_implementation { get; set; }
+        private string drop_folder { get; set; }
+        private string drop_folder_history { get; set; }
+
         public OrderController()
         {
-
+            is_oracle_implementation = ConfigurationManager.AppSettings["Implementation"] == "oracle";
+            drop_folder = ConfigurationManager.AppSettings["DROP_FOLDER"];
+            drop_folder_history = ConfigurationManager.AppSettings["DROP_FOLDER_HISTORY"];
         }
-
 
         [HttpPost, Route("initialize-order")]
         public bool InitializeAccession([FromBody] OderData hl7)
         {
             try
             {
-                File.WriteAllText(DROP_FOLDER + hl7.OrderNumber + ".exp", hl7.OrderData);
-                File.WriteAllText(Path.Combine(@"C:\Drop\", hl7.OrderNumber) + ".exp1", hl7.OrderData);
+                File.WriteAllText(drop_folder + hl7.OrderNumber + ".exp", hl7.OrderData);
+                File.WriteAllText(Path.Combine(drop_folder_history, hl7.OrderNumber) + ".exp1", hl7.OrderData);
                 return true;
             }
             catch
@@ -41,8 +49,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Controllers
         {
             try
             {
-                File.WriteAllText(DROP_FOLDER + hl7.OrderNumber + ".exp", hl7.OrderData);
-                File.WriteAllText(Path.Combine(@"C:\Drop\", hl7.OrderNumber) + ".exp3", hl7.OrderData);
+                File.WriteAllText(drop_folder + hl7.OrderNumber + ".exp", hl7.OrderData);
+                File.WriteAllText(Path.Combine(drop_folder_history, hl7.OrderNumber) + ".exp3", hl7.OrderData);
                 return  true;
             }
             catch
@@ -83,32 +91,28 @@ namespace ITestBlood.WebApi.LabdaqReports.Controllers
         [HttpGet, Route("order-result/{acc_id}")]
         public IHttpActionResult GetOrderPanels(int acc_id)
         {
-            return Ok(new OrderReportRepository(acc_id).GetOrderPanels());
-        }
-
-        [HttpGet, Route("order-result-old/{acc_id}")]
-        public IHttpActionResult GetOrderPanelsMsSql(int acc_id)
-        {
-            return Ok(new OrderReportRepository(acc_id).GetOrderPanelsMsSQL());
-        }
-
-        [HttpPost, Route("order-status")]
-        public IHttpActionResult GetOrderPanels(List<string> acc_ids)
-        {
-            using (var lab = new LabdaqClient())
+            if (is_oracle_implementation)
             {
-                var SQL_GET_ORDER = @"SELECT ACC_ID, LD1.fnc_req_status_text(rq.ACC_ID) as FINAL_STATUS FROM REQUISITIONS rq WHERE rq.ACC_ID in ({0}) ";
-
-                return Ok(lab.RunSql(String.Format(SQL_GET_ORDER, String.Join(",", acc_ids)), -1).Select(s => new 
-                {
-                    AccId = Convert.ToInt32(s["ACC_ID"]),
-                    FinalStatus = s["FINAL_STATUS"].ToString(),
-                }).ToList());
+                return Ok(new OrderReportOracleRepository(acc_id).GetOrderPanels());
+            }
+            else
+            {
+                return Ok(new OrderReportMsSqlRepository(acc_id).GetOrderPanelsMsSQL());
             }
         }
 
-
-        const string DROP_FOLDER = @"\\192.168.1.105\Lab Orders\";
+        [HttpPost, Route("order-status")]
+        public IHttpActionResult GetOrderStatus(List<string> acc_ids)
+        {
+            if (is_oracle_implementation)
+            {
+                return Ok(new OrderStatus(acc_ids).Get());
+            }
+            else
+            {
+                return Ok(new OrderStatusMsSql(acc_ids).Get());
+            }
+        }
     }
 
     public class OderData
