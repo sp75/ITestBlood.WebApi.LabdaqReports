@@ -12,17 +12,17 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
     {
         private string _pat_id { get; set; }
         private DateTime _current_date { get; set; }
-        private string _test_id { get; set; }
+    //    private string _test_id { get; set; }
 
-        public PreviousResultsMsSql(string pat_id, DateTime current_date, string test_id)
+        public PreviousResultsMsSql(string pat_id, DateTime current_date)
         {
             _pat_id = pat_id;
             _current_date = current_date;
-            _test_id = test_id;
+      //      _test_id = test_id;
         }
         public List<PanelResultData> Get()
         {
-            var str = String.Format(SQL_GET_TEST_RESULTS, _pat_id, _test_id);
+            var str = String.Format(SQL_GET_TEST_RESULTS, _pat_id);
 
             return new Proc(str, "labdaq_mssql") { { "current_date", _current_date } }.All().Select(s => new PanelResultData
             {
@@ -47,13 +47,13 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
         }
 
         const string SQL_GET_TEST_RESULTS = @"
-            select top 6  x.* from 
+            select x.* from 
             (
                 select 
                     rp.RP_ID,
                     rp.PROFILE_NAME as PANEL_NAME,
                     rp.PROFILE_ID PANEL_ID, 
-                    res.CREATED_DATE , 
+                    rp.CREATED_DATE , 
                     res.TEST_NO as TEST_ID, 
                     res.RESULT_NUMERIC, 
                     res.RESULT_ALPHA, 
@@ -71,14 +71,14 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 from RL_REQ_PANELS rp
                 inner join RL_RESULTS res on res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < @current_date and res.TEST_NO = '{1}'
+                where rp.DEL_FLAG='F'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < @current_date 
              
                 union all
                 select 
                     rp.RP_ID, 
                     p.PANEL_NAME, 
                     cast( rp.PANEL_ID as varchar) PANEL_ID, 
-                    res.CREATED_DATE, 
+                    rp.CREATED_DATE, 
                     cast( res.TEST_ID as varchar) TEST_ID, 
                     res.RESULT_NUMERIC, 
                     res.RESULT_ALPHA, 
@@ -97,7 +97,7 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 inner join PANELS p on rp.PANEL_ID = p.PANEL_ID
                 inner join RESULTS res on  res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < @current_date and  cast( res.TEST_ID as varchar) = '{1}'
+                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < @current_date   
             )x
             order by CREATED_DATE desc";
     }

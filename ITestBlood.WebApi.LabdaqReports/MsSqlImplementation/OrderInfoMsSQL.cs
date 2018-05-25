@@ -47,7 +47,7 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
             return proc.Select(s => new OrderInfoView
             {
                 AccId = Convert.ToInt32(s["AccId"]),
-                PrintedDate = s["PrintedDate"] != DBNull.Value ? (DateTime?)s["PRINTED_DATE"] : null,
+                PrintedDate = s["PrintedDate"] != DBNull.Value ? (DateTime?)s["PrintedDate"] : null,
                 FinalStatus = s["FinalStatus"].ToString(),
                 Notes = s["Notes"].ToString(),
                 PatId = s["PatId"].ToString(),

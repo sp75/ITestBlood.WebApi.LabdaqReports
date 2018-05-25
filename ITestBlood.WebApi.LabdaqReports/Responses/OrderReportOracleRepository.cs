@@ -64,6 +64,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     }
                 });
 
+                var prev_result = new PreviousResults(order_info.PatId, order_info.CreatedDate).Get();
+
                 int STINoteIndex = 0;
                 var panels = lab_result.GroupBy(g => new { g.PanelId, g.PanelName, g.PanelType, g.PanelStatus, g.PanelNotes, g.AddedAfterPrint, g.CreatedDate }).Select(s => new
                 {
@@ -76,6 +78,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     s.Key.PanelNotes,
                     s.Key.AddedAfterPrint,
                     s.Key.CreatedDate,
+                    PrevResultDates = prev_result.Where(w=> w.PanelId == s.Key.PanelId).OrderByDescending(o=> o.CreatedDate).Select(ps=> ps.CreatedDate).Distinct().Take(6),
                     Tests = s.Select(t => new
                     {
                         t.TestId,
@@ -107,7 +110,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                                     Outcome = new string[] { "S", "D" }.Contains(s.Key.PanelType) ? (r.IsPositive == 1 ? "POSITIVE" : "NEGATIVE") : "",
                                     IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1
                                 }).FirstOrDefault(),
-                            Previous = new PreviousResults(order_info.PatId, s.Key.CreatedDate, t.TestId).Get().Select(r => new
+                            Previous =/* new PreviousResults(order_info.PatId, s.Key.CreatedDate, t.TestId).Get()*/prev_result.Where(w=> w.TestId == t.TestId).Select(r => new
                             {
                                 r.AccId,
                                 r.CreatedDate,
@@ -125,7 +128,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                                 r.ResultCodeText,
                                 r.ResultAlpha,
                                 Result = Helper.GetResult(evetns.Where(ev => ev.TestId == t.TestId).ToList(), r, t)
-                            }).ToList()
+                            }).ToList().OrderByDescending(o=> o.CreatedDate).Take(6)
                         }
                     })
                 }).ToList();
@@ -156,7 +159,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                         Comments = !String.IsNullOrEmpty(gross_description) ? gross_description : lab_result.Where(w => w.PanelId == "2975-2" && w.TestId == "990011A").Select(s => s.PrintNotes).FirstOrDefault(),
                         TestOrdered = test_result.Where(w => w.PanelId == "2975-2" && w.TestId == "990004A" /*Gross*/).Select(s => s.ResultAlpha).FirstOrDefault(),
                         ClinicalInformation = test_result.Where(w => w.PanelId == "2975" && w.TestId == "993001" /*ClinicalHistory*/).OrderByDescending(o => o.CreatedDate).Select(s => s.ResultAlpha).FirstOrDefault(),
-                        PriorHistory = prior_history.Any() ? new PreviousResults(order_info.PatId, order_info.CreatedDate, "991002A").Get().Select(r => new
+                        PriorHistory = prior_history.Any() ? /*new PreviousResults(order_info.PatId, order_info.CreatedDate, "991002A").Get()*/prev_result.Where(w=> w.TestId == "991002A")
+                        .Select(r => new
                         {
                             SpecimenNumber = r.AccId,
                             ReceivedDate = r.ReceivedDate,

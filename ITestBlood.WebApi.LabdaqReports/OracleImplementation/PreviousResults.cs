@@ -12,20 +12,20 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
     {
         private string _pat_id { get; set; }
         private  DateTime _current_date { get; set; }
-        private string _test_id { get; set; }
+   //     private string _test_id { get; set; }
 
-        public PreviousResults(string pat_id, DateTime current_date, string test_id)
+        public PreviousResults(string pat_id, DateTime current_date)
         {
             _pat_id = pat_id;
             _current_date = current_date;
-            _test_id = test_id;
+        //    _test_id = test_id;
         }
 
         public List<PanelResultData> Get()
         {
             using (var lab = new LabdaqClient())
             {
-                var str = String.Format(SQL_GET_TEST_RESULTS, _pat_id, _current_date.ToString("MM/dd/yyyy hh:mm:ss"), _test_id);
+                var str = String.Format(SQL_GET_TEST_RESULTS, _pat_id, _current_date.ToString("MM/dd/yyyy hh:mm:ss"));
                 return lab.RunSql(str, -1).Select(s => new PanelResultData
                 {
                     PanelId = s["PANEL_ID"].ToString(),
@@ -75,7 +75,7 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                 from RL_REQ_PANELS rp
                 inner join RL_RESULTS res on res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) and res.TEST_NO = '{2}'
+                where rp.DEL_FLAG='F'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) 
              
                 union all
                 select 
@@ -101,10 +101,10 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                 inner join PANELS p on rp.PANEL_ID = p.PANEL_ID
                 inner join RESULTS res on  res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) and  TO_CHAR( res.TEST_ID ) = '{2}'
+                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) 
             )
             order by CREATED_DATE desc
-          )  where  ROWNUM <= 6";
+          )";
 
     }
 }
