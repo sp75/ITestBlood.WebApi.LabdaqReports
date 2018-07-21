@@ -58,7 +58,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     StorageStability = s["STORAGE_STABILITY"].ToString(),
                 }).ToList().ForEach(item =>
                 {
-                    if (!lab_result.Any(a => a.TestId == item.TestId && a.PanelType == item.PanelType) ) //(!lab_result.Select(s => s.TestId).Contains(item.TestId))
+                    if (!lab_result.Any(a => a.TestId == item.TestId && a.PanelType == item.PanelType) )  //(!lab_result.Select(s => s.TestId).Contains(item.TestId))
                     {
                         lab_result.Add(item);
                     }
