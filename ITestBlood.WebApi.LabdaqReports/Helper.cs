@@ -42,10 +42,35 @@ namespace ITestBlood.WebApi.LabdaqReports
                     }
                 }
 
-                if ((r.ResultNumeric >= test_event.GreaterThan && r.ResultNumeric < test_event.LessThan) && !string.IsNullOrEmpty(result_translation))
+                if (!string.IsNullOrEmpty(result_translation))
+                {
+                    if (test_event.LessThan != null && test_event.GreaterThan != null)
+                    {
+                        if ((r.ResultNumeric <= test_event.LessThan) && (r.ResultNumeric >= test_event.GreaterThan))
+                        {
+                            return result_translation;
+                        }
+                    }
+                    else if (test_event.LessThan != null)
+                    {
+                        if (r.ResultNumeric < test_event.LessThan)
+                        {
+                            return result_translation;
+                        }
+                    }
+                    else if (test_event.GreaterThan != null)
+                    {
+                        if (r.ResultNumeric > test_event.GreaterThan)
+                        {
+                            return result_translation;
+                        }
+                    }
+                }
+
+              /*  if ((r.ResultNumeric >= test_event.GreaterThan && r.ResultNumeric < test_event.LessThan) && !string.IsNullOrEmpty(result_translation))
                 {
                     return result_translation;
-                }
+                }*/
             }
 
             return result;

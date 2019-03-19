@@ -25,18 +25,13 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 result.Add(new Proc(SQL_GET_ORDER, "labdaq_mssql") { { "acc_id", item } }.All().Select(s => new OrderStatusView
                 {
                     AccId = Convert.ToInt32(item),
-                    FinalStatus = s["Status"].ToString()
+                    FinalStatus = s["FinalStatus"].ToString()
                 }).FirstOrDefault());
             }
 
             return result;
-         }
+        }
 
-        const string SQL_GET_ORDER = @"
-                   select ( case when PanelCount = FinalCount then 'FINAL COPY' else 'PRELIMINARY' end ) Status  
-                   from (
-                           SELECT COUNT(*) as PanelCount , sum ((case when PanelStatus = 'FINAL' then 1 else 0 end ) ) as FinalCount 
-                           FROM [labdaq].[dbo].[GetPanelsResult] ( @acc_id )
-                        )x ";
+        const string SQL_GET_ORDER = @"select FinalStatus from dbo.GetReqStatus( @acc_id)";
     }
 }

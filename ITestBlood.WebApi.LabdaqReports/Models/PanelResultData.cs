@@ -8,6 +8,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Models
 {
     public class PanelResultData
     {
+        public Int32 RpId { get; set; }
         public int AccId { get; set; }
         public string PanelId { get; set; }
         public DateTime CreatedDate { get; set; }

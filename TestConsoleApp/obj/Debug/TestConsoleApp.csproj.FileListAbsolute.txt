@@ -1,0 +1,9 @@
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\obj\Debug\TestConsoleApp.csprojResolveAssemblyReference.cache
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\obj\Debug\TestConsoleApp.csproj.CoreCompileInputs.cache
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\bin\Debug\TestConsoleApp.exe.config
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\bin\Debug\TestConsoleApp.exe
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\bin\Debug\TestConsoleApp.pdb
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\bin\Debug\Newtonsoft.Json.dll
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\bin\Debug\Newtonsoft.Json.xml
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\obj\Debug\TestConsoleApp.exe
+C:\4iB\ITestBlood.WebApi.LabdaqReports\TestConsoleApp\obj\Debug\TestConsoleApp.pdb

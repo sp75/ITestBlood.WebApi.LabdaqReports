@@ -22,12 +22,7 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
             var SQL_GET_ORDER = @"
                 SELECT
                   cast (rq.ACC_ID as int ) AccId,
-                  (select ( case when PanelCount = FinalCount then 'FINAL COPY' else 'PRELIMINARY' end ) Status  
-                   from (
-                           SELECT COUNT(*) as PanelCount , sum ((case when PanelStatus = 'FINAL' then 1 else 0 end ) ) as FinalCount 
-                           FROM [labdaq].[dbo].[GetPanelsResult] (  rq.ACC_ID )
-                        )x 
-                  ) as FinalStatus,
+                  ( select FinalStatus from dbo.GetReqStatus( rq.ACC_ID)) as FinalStatus ,
                   rq.PRINTED_DATE PrintedDate,
                   rq.NOTES Notes,
                   rq.pat_id PatId,

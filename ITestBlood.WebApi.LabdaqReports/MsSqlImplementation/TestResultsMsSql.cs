@@ -23,6 +23,7 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
 
             return proc.Select(s => new PanelResultData
             {
+                RpId = Convert.ToInt32( s["RP_ID"]),
                 PanelId = s["PANEL_ID"].ToString(),
                 CreatedDate = (DateTime)s["CREATED_DATE"],
                 TestId = s["TEST_ID"].ToString(),

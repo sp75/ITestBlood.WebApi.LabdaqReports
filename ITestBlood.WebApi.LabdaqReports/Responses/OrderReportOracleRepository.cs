@@ -92,6 +92,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                         {
                             Current = test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
                                 {
+                                    r.RpId,
                                     r.CreatedDate,
                                     r.ResultNumeric,
                                     r.Flag,
@@ -110,7 +111,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                                     Outcome = new string[] { "S", "D" }.Contains(s.Key.PanelType) ? (r.IsPositive == 1 ? "POSITIVE" : "NEGATIVE") : "",
                                     IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1
                                 }).FirstOrDefault(),
-                            Previous =/* new PreviousResults(order_info.PatId, s.Key.CreatedDate, t.TestId).Get()*/prev_result.Where(w=> w.TestId == t.TestId).Select(r => new
+                            Previous =/* new PreviousResults(order_info.PatId, s.Key.CreatedDate, t.TestId).Get()*/prev_result.Where(w=> w.TestId == t.TestId && w.PanelId == t.PanelId).Select(r => new
                             {
                                 r.AccId,
                                 r.CreatedDate,
@@ -155,11 +156,12 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     GynCytology = new
                     {
                         Diagnosis = !String.IsNullOrEmpty(final_diagnosis) ? final_diagnosis : lab_result.Where(w => w.PanelId == "2975-2" && w.TestId == "991002A").Select(s => s.PrintNotes).FirstOrDefault(),
+                        IsAbnormalDiagnosis = panels.Any(a => a.PanelId == "2975-2" && a.Tests.Any(ta => ta.TestName == "Abnormal" && ta.Results.Current != null && ta.Results.Current.ResultAlpha == "True")) ? 1 : 0,
                         Adequacy = !String.IsNullOrEmpty(specimen_adequacy) ? specimen_adequacy : lab_result.Where(w => w.PanelId == "2975-2" && w.TestId == "992002A").Select(s => s.PrintNotes).FirstOrDefault(),
                         Comments = !String.IsNullOrEmpty(gross_description) ? gross_description : lab_result.Where(w => w.PanelId == "2975-2" && w.TestId == "990011A").Select(s => s.PrintNotes).FirstOrDefault(),
                         TestOrdered = test_result.Where(w => w.PanelId == "2975-2" && w.TestId == "990004A" /*Gross*/).Select(s => s.ResultAlpha).FirstOrDefault(),
                         ClinicalInformation = test_result.Where(w => w.PanelId == "2975" && w.TestId == "993001" /*ClinicalHistory*/).OrderByDescending(o => o.CreatedDate).Select(s => s.ResultAlpha).FirstOrDefault(),
-                        PriorHistory = prior_history.Any() ? /*new PreviousResults(order_info.PatId, order_info.CreatedDate, "991002A").Get()*/prev_result.Where(w=> w.TestId == "991002A")
+                        PriorHistory = prior_history.Any() ? /*new PreviousResults(order_info.PatId, order_info.CreatedDate, "991002A").Get()*/prev_result.Where(w => w.TestId == "991002A")
                         .Select(r => new
                         {
                             SpecimenNumber = r.AccId,

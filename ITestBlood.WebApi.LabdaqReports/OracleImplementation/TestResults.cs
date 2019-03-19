@@ -27,6 +27,7 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
 
             return _lab.RunSql(SQL_GET_TEST_RESULTS, args).Select(s => new PanelResultData
             {
+                RpId = Convert.ToInt32(s["RP_ID"]),
                 PanelId = s["PANEL_ID"].ToString(),
                 CreatedDate = (DateTime)s["CREATED_DATE"],
                 TestId = s["TEST_ID"].ToString(),

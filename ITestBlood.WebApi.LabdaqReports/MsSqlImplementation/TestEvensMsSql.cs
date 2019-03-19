@@ -24,8 +24,8 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
             {
                 TestId = s["TEST_ID"].ToString(),
                 ResultTranslation = s["RESULT_TRANSLATION"].ToString(),
-                LessThan = s["LESS_THAN"].ToDecimal() ?? 0,
-                GreaterThan = s["GREATER_THAN"].ToDecimal() ?? 0,
+                LessThan = s["LESS_THAN"].ToDecimal() ,
+                GreaterThan = s["GREATER_THAN"].ToDecimal() ,
                 IsFlag = s["IS_FLAG"].ToString() == "T",
                 AlphaText = s["ALPHA_TEXT"].ToString(),
                 Flag = s["FLAG"].ToString(),

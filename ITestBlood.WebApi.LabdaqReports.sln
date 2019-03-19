@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITestBlood.WebApi.LabdaqReports", "ITestBlood.WebApi.LabdaqReports\ITestBlood.WebApi.LabdaqReports.csproj", "{EF15BF78-1983-4073-A7F1-34499613EAD3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{E3528320-BF1A-40D7-ABCB-460500F2371C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EF15BF78-1983-4073-A7F1-34499613EAD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF15BF78-1983-4073-A7F1-34499613EAD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF15BF78-1983-4073-A7F1-34499613EAD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3528320-BF1A-40D7-ABCB-460500F2371C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3528320-BF1A-40D7-ABCB-460500F2371C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3528320-BF1A-40D7-ABCB-460500F2371C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3528320-BF1A-40D7-ABCB-460500F2371C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
