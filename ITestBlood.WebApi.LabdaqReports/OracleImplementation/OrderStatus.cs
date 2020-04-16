@@ -23,6 +23,7 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                 {
                     AccId = Convert.ToInt32(s["ACC_ID"]),
                     FinalStatus = s["FINAL_STATUS"].ToString(),
+                    HasAbnormalTests = new TestResults(lab, Convert.ToInt32(s["ACC_ID"])).Get().Any(a => (String.IsNullOrEmpty(a.Flag) || a.Flag == "N" ? false : true)) 
                 }).ToList();
             }
         }

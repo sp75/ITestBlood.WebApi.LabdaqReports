@@ -26,7 +26,9 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                   rq.PRINTED_DATE PrintedDate,
                   rq.NOTES Notes,
                   rq.pat_id PatId,
-                  rq.CREATED_DATE CreatedDate
+                  rq.CREATED_DATE CreatedDate,
+                  rq.FASTING,
+                  rq.DRAW_DATE 
                 FROM REQUISITIONS rq 
                 INNER JOIN patients pt ON rq.pat_id = pt.pat_id
                 INNER JOIN doctors doc ON rq.doc_id1 = doc.doc_id
@@ -46,7 +48,9 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 FinalStatus = s["FinalStatus"].ToString(),
                 Notes = s["Notes"].ToString(),
                 PatId = s["PatId"].ToString(),
-                CreatedDate = (DateTime)s["CreatedDate"]
+                CreatedDate = (DateTime)s["CreatedDate"],
+                Fasting = s["FASTING"].ToString(),
+                DrawDate = s["DRAW_DATE"] != DBNull.Value ? (DateTime?)s["DRAW_DATE"] : null
             }).FirstOrDefault();
         }
     }

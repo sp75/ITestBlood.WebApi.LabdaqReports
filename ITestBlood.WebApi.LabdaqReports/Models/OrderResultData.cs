@@ -27,5 +27,6 @@ namespace ITestBlood.WebApi.LabdaqReports.Models
         public string TestResultType { get; set; }
         public int IsAllergen { get; set; }
         public string StorageStability { get; set; }
+        public string STAT { get; set; }
     }
 }

@@ -54,6 +54,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 AlphaRangeText = s["ALPHA_RANGE_TEXT1"].ToString(),
                 IsAllergen = new Regex(@"\[[A-Z]\d{1,3}\]").IsMatch(s["TEST_NAME"].ToString()) ? 1 : 0,
                 StorageStability = s["STORAGE_STABILITY"].ToString(),
+                STAT = s["STAT"].ToString()
             }).ToList().ForEach(item =>
             {
                 if (!lab_result.Any(a=> a.TestId == item.TestId  && a.PanelType == item.PanelType) /*Select(s => s.TestId).Contains(item.TestId)*/)
@@ -73,7 +74,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 g.PanelStatus,
                 g.PanelNotes,
                 g.AddedAfterPrint,
-                g.CreatedDate
+                g.CreatedDate,
+                g.STAT
             }).Select(s => new
             {
                 s.Key.PanelId,
@@ -85,6 +87,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 s.Key.PanelNotes,
                 s.Key.AddedAfterPrint,
                 s.Key.CreatedDate,
+                s.Key.STAT,
                 PrevResultDates = prev_result.Where(w => w.PanelId == s.Key.PanelId).OrderByDescending(o => o.CreatedDate).Select(ps => ps.CreatedDate).Distinct().Take(6),
                 Tests = s.Select(t => new
                 {
@@ -202,7 +205,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                   pnl.PANEL_TYPE,
                   (case when rp.RUN_DATE is null then 'PRELIMINARY' else 'FINAL' end) PANEL_STATUS ,
                   (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
-                  tst.STORAGE_STABILITY 
+                  tst.STORAGE_STABILITY,
+                  rp.STAT
                 FROM req_panels rp   
                 INNER JOIN REQUISITIONS rq ON rq.acc_id = rp.acc_id 
                 INNER JOIN panels pnl ON rp.panel_id = pnl.panel_id 
@@ -227,15 +231,14 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     '' as PANEL_TYPE,
                     (case when rp.RUN_DATE is null then 'PRELIMINARY' else 'FINAL' end) PANEL_STATUS ,
                     (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
-                    '' as STORAGE_STABILITY
+                    '' as STORAGE_STABILITY,
+                    rp.STAT
                 FROM RL_REQ_PANELS rp 
                 inner join requisitions rq on rq.acc_id = rp.acc_id
                 left outer join RL_RESULTS res on res.rp_id = rp.rp_id
                 WHERE rq.ACC_ID= @acc_id and rp.DEL_FLAG='F'
         )x
         ORDER BY  panel_name ASC, test_id ASC, test_name ASC";
-
     }
-
 
 }

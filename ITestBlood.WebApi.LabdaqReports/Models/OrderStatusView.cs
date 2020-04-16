@@ -9,5 +9,6 @@ namespace ITestBlood.WebApi.LabdaqReports.Models
     {
         public int AccId { get; set; }
         public string FinalStatus { get; set; }
+        public bool HasAbnormalTests { get; set; }
     }
 }

@@ -25,7 +25,8 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 result.Add(new Proc(SQL_GET_ORDER, "labdaq_mssql") { { "acc_id", item } }.All().Select(s => new OrderStatusView
                 {
                     AccId = Convert.ToInt32(item),
-                    FinalStatus = s["FinalStatus"].ToString()
+                    FinalStatus = s["FinalStatus"].ToString(),
+                    HasAbnormalTests = new TestResultsMsSql(Convert.ToInt32(s["ACC_ID"])).Get().Any(a => (String.IsNullOrEmpty(a.Flag) || a.Flag == "N" ? false : true))
                 }).FirstOrDefault());
             }
 

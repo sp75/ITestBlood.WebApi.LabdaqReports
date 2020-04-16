@@ -14,5 +14,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Models
         public string Notes { get; set; }
         public string PatId { get; set; }
         public DateTime CreatedDate { get; set; }
+        public  string Fasting { get; set; }
+        public DateTime? DrawDate { get; set; }
     }
 }

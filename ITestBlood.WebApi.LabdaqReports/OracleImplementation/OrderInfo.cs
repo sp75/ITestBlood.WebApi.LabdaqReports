@@ -30,7 +30,9 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                   rq.received_date,
                   rq.NOTES,
                   rq.pat_id,
-                  rq.CREATED_DATE
+                  rq.CREATED_DATE,
+                  rq.FASTING,
+                  rq.DRAW_DATE 
                 FROM REQUISITIONS rq 
                 INNER JOIN patients pt ON rq.pat_id = pt.pat_id
                 INNER JOIN doctors doc ON rq.doc_id1 = doc.doc_id
@@ -43,7 +45,9 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                 FinalStatus = s["FINAL_STATUS"].ToString(),
                 Notes = s["NOTES"].ToString(),
                 PatId = s["PAT_ID"].ToString(),
-                CreatedDate = (DateTime)s["CREATED_DATE"]
+                CreatedDate = (DateTime)s["CREATED_DATE"],
+                Fasting = s["FASTING"].ToString(),
+                DrawDate = s["DRAW_DATE"] != DBNull.Value ? (DateTime?)s["DRAW_DATE"] : null,
             }).FirstOrDefault();
         }
     }
