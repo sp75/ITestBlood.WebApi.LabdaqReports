@@ -111,8 +111,9 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                                     r.ResultAlpha,
                                     Result = Helper.GetResult(evetns.Where(ev => ev.TestId == t.TestId).ToList(), r, t),
                                     Outcome = new string[] { "S", "D" }.Contains(s.Key.PanelType) ? (r.IsPositive == 1 ? "POSITIVE" : "NEGATIVE") : "",
-                                    IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1
-                                }).FirstOrDefault(),
+                                    IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1,
+                                    r.ResultTranslation
+                            }).FirstOrDefault(),
                             Previous =/* new PreviousResults(order_info.PatId, s.Key.CreatedDate, t.TestId).Get()*/prev_result.Where(w=> w.TestId == t.TestId && w.PanelId == t.PanelId).Select(r => new
                             {
                                 r.AccId,
@@ -130,7 +131,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                                 ResultType = Helper.GetResultType(r.Flag),
                                 r.ResultCodeText,
                                 r.ResultAlpha,
-                                Result = Helper.GetResult(evetns.Where(ev => ev.TestId == t.TestId).ToList(), r, t)
+                                Result = Helper.GetResult(evetns.Where(ev => ev.TestId == t.TestId).ToList(), r, t),
+                                r.ResultTranslation
                             }).ToList().OrderByDescending(o=> o.CreatedDate).Take(6)
                         }
                     })
