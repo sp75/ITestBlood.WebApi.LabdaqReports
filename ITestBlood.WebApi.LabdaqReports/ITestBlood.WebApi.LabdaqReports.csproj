@@ -120,6 +120,7 @@
     <Compile Include="App_Start\JsonContentNegotiator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\OrderController.cs" />
+    <Compile Include="Controllers\ReqpoolController.cs" />
     <Compile Include="Controllers\TestBloodController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

@@ -26,7 +26,6 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                   rq.ACC_ID,
                   rq.PRINTED_DATE,
                   LD1.fnc_req_status_text(rq.ACC_ID) as FINAL_STATUS,
-                  rq.draw_date,
                   rq.received_date,
                   rq.NOTES,
                   rq.pat_id,
