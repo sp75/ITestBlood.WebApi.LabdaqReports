@@ -14,7 +14,7 @@ namespace ITestBlood.WebApi.LabdaqReports
             var type = GetResultType(r.Flag);
             string result = r.ResultNumeric == null ? (r.ResultAlpha == "OCC" ? r.ResultTranslation : r.ResultAlpha) : (Convert.ToString(od.DecPlaces == null ? r.ResultNumeric.Value : Math.Round(r.ResultNumeric.Value, od.DecPlaces.Value, MidpointRounding.AwayFromZero)) + (type != null ? " " + type.prefix : ""));
 
-            var result_translation = r.ResultTranslation;
+            var result_translation = $"{r.ResultTranslation} {(type != null ? type.prefix : "")}";
 
             foreach (var test_event in events)
             {

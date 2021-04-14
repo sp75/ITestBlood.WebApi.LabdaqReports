@@ -98,6 +98,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     STINoteIndex = Tests.STITests.Contains(s.Key.PanelId) && !String.IsNullOrEmpty(t.PrintNotes) ? (int?)++STINoteIndex : null,
                     t.IsAllergen,
                     t.StorageStability,
+                    TestResultType = t.TestResultType == "N" ? "numeric" : (t.TestResultType == "A" ? "alphanumeric" : ""),
                     Results = new
                     {
                         Current = test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
@@ -161,7 +162,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 HasDrugsTests = lab_result.Any(a => a.PanelType == "D" || a.PanelType == "S") ? 1 : 0,
                 HasAbnormalTests = test_result.Any(a => (String.IsNullOrEmpty(a.Flag) || a.Flag == "N" ? 0 : 1) == 1) ? 1 : 0,
                 HasSTITests = test_result.Any(a => Tests.STITests.Contains(a.TestId)),
-                HasThinPrepPanels = test_result.Any(a => new string[] { "2975", "2975-2" }.Contains(a.PanelId)),
+                HasThinPrepPanels = lab_result.Any(a => new string[] { "2975", "2975-2" }.Contains(a.PanelId)),
                 Order = order_info,
                 Panels = panels,
                 Drugs = drugs,
@@ -173,15 +174,16 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     Comments = !String.IsNullOrEmpty(gross_description) ? gross_description : lab_result.Where(w => w.PanelId == "2975-2" && w.TestId == "990011A").Select(s => s.PrintNotes).FirstOrDefault(),
                     TestOrdered = test_result.Where(w => w.PanelId == "2975-2" && w.TestId == "990004A" /*Gross*/).Select(s => s.ResultAlpha).FirstOrDefault(),
                     ClinicalInformation = test_result.Where(w => w.PanelId == "2975" && w.TestId == "993001" /*ClinicalHistory*/).OrderByDescending(o => o.CreatedDate).Select(s => s.ResultAlpha).FirstOrDefault(),
-                    PriorHistory = prior_history.Any() ? prev_result.Where(w => w.TestId == "991002A").Select(r => new
+                    PriorHistory = prior_history.Any() ? prev_result.Where(w => w.TestId == "991002A").OrderByDescending(o => o.CreatedDate).Select(r => new
                     {
                         SpecimenNumber = r.AccId,
                         ReceivedDate = r.ReceivedDate,
                         ReportDate = r.PrintedDate,
                         ReportType = r.PanelName,
                         Diagnosis = r.ResultAlpha,
-                        Test = prior_history
-                    }).ToList() : null
+                        Test = prior_history,
+                        
+                    }).Take(1).ToList() : null
                 }
             };
 
