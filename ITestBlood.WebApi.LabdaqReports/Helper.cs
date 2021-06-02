@@ -12,9 +12,9 @@ namespace ITestBlood.WebApi.LabdaqReports
         public static string GetResult(List<EventData> events, PanelResultData r, OrderResultData od)
         {
             var type = GetResultType(r.Flag);
-            string result = r.ResultNumeric == null ? (r.ResultAlpha == "OCC" ? r.ResultTranslation : r.ResultAlpha) : (Convert.ToString(od.DecPlaces == null ? r.ResultNumeric.Value : Math.Round(r.ResultNumeric.Value, od.DecPlaces.Value, MidpointRounding.AwayFromZero)) + (type != null ? " " + type.prefix : ""));
+            string result = r.ResultNumeric == null ? (!string.IsNullOrEmpty(r.ResultTranslation) ? r.ResultTranslation : r.ResultAlpha) : (Convert.ToString(od.DecPlaces == null ? r.ResultNumeric.Value : Math.Round(r.ResultNumeric.Value, od.DecPlaces.Value, MidpointRounding.AwayFromZero)) + (type != null ? " " + type.prefix : ""));
 
-            var result_translation = $"{r.ResultTranslation} {(type != null ? type.prefix : "")}";
+            var result_translation = !string.IsNullOrEmpty(r.ResultTranslation) ? $"{r.ResultTranslation} {(type != null ? type.prefix : "")}" : "";
 
             foreach (var test_event in events)
             {

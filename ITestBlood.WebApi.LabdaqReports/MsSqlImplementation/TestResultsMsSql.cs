@@ -87,7 +87,7 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 inner join PANELS p on rp.PANEL_ID = p.PANEL_ID
                 inner join RESULTS res on  res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T' and rp.ACC_ID  = @acc_id 
+                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T' and coalesce( res.RESULT_CODE_ID , ' ')  <> 'DNR' and rp.ACC_ID  = @acc_id 
             )x
             order by CREATED_DATE desc";
     }

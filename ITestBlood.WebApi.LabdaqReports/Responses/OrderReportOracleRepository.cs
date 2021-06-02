@@ -65,7 +65,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     }
                 });
 
-                var prev_result = new PreviousResults(order_info.PatId, order_info.CreatedDate).Get();
+                var prev_result = new PreviousResults(order_info.PatId, order_info.CreatedDate).Get().Where(w => w.AccId != _acc_id).ToList();
 
                 int STINoteIndex = 0;
                 var panels = lab_result.GroupBy(g => new { g.PanelId, g.PanelName, g.PanelType, g.PanelStatus, g.PanelNotes, g.AddedAfterPrint, g.CreatedDate, g.STAT }).Select(s => new
@@ -203,7 +203,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                   (case when rp.RUN_DATE is null then 'PRELIMINARY' else 'FINAL' end) PANEL_STATUS ,
                   (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
                   tst.STORAGE_STABILITY,
-                  rp.STAT
+                  rp.STAT,
+                  coalesce( pnl.SORT_ID, 0) SORT_ID 
                 FROM req_panels rp   
                 INNER JOIN REQUISITIONS rq ON rq.acc_id = rp.acc_id 
                 INNER JOIN panels pnl ON rp.panel_id = pnl.panel_id 
@@ -229,13 +230,15 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     (case when rp.RUN_DATE is null then 'PRELIMINARY' else 'FINAL' end) PANEL_STATUS ,
                     (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
                     '' as STORAGE_STABILITY,
-                    rp.STAT
+                    rp.STAT,
+                    coalesce( pg.SORT_ID, 0) SORT_ID 
                 FROM RL_REQ_PANELS rp 
                 inner join requisitions rq on rq.acc_id = rp.acc_id
-                left outer join RL_RESULTS res on res.rp_id = rp.rp_id
+                LEFT OUTER JOIN RL_RESULTS res on res.rp_id = rp.rp_id
+                LEFT OUTER JOIN RL_PROFILES pg on pg.RL_ID = rp.RL_ID and pg.PROFILE_ID = rp.PROFILE_ID
                 WHERE rq.ACC_ID= :acc_id and rp.DEL_FLAG='F'
         )
-        ORDER BY  panel_name ASC, test_id ASC, test_name ASC";
+        ORDER BY SORT_ID asc, panel_name ASC, test_id ASC, test_name ASC";
     }
 
 

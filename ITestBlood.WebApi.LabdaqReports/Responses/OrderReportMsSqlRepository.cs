@@ -28,8 +28,6 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
         {
             var order_info = new OrderInfoMsSQL(_acc_id).Get();
 
-          
-
             var test_result = new TestResultsMsSql(_acc_id).Get();
             var evetns = new TestEvensMsSql(_acc_id).Get();
             var drugs = new MsSqlImplementation.DrugPanelsMsSql(_acc_id).Get();
@@ -54,7 +52,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 AlphaRangeText = s["ALPHA_RANGE_TEXT1"].ToString(),
                 IsAllergen = new Regex(@"\[[A-Z]\d{1,3}\]").IsMatch(s["TEST_NAME"].ToString()) ? 1 : 0,
                 StorageStability = s["STORAGE_STABILITY"].ToString(),
-                STAT = s["STAT"].ToString()
+                STAT = s["STAT"].ToString(),
+                RunDate = s["RUN_DATE"] != DBNull.Value ? (DateTime?)s["RUN_DATE"] : null
             }).ToList().ForEach(item =>
             {
                 if (!lab_result.Any(a=> a.TestId == item.TestId  && a.PanelType == item.PanelType) /*Select(s => s.TestId).Contains(item.TestId)*/)
@@ -63,7 +62,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 }
             });
 
-            var prev_result = new PreviousResultsMsSql(order_info.PatId, order_info.CreatedDate).Get();
+            var prev_result = new PreviousResultsMsSql(order_info.PatId, order_info.CreatedDate).Get().Where(w => w.AccId != _acc_id).ToList();
 
             int STINoteIndex = 0;
             var panels = lab_result.GroupBy(g => new
@@ -99,6 +98,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     t.IsAllergen,
                     t.StorageStability,
                     TestResultType = t.TestResultType == "N" ? "numeric" : (t.TestResultType == "A" ? "alphanumeric" : ""),
+                    t.RunDate,
                     Results = new
                     {
                         Current = test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
@@ -123,7 +123,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                             IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1,
                             r.ResultTranslation
                         }).FirstOrDefault(),
-                        Previous = prev_result.Where(w => w.TestId == t.TestId).Select(r => new
+                        Previous = prev_result.Where(w => w.TestId == t.TestId ).Select(r => new
                         {
                             r.AccId,
                             r.CreatedDate,
@@ -210,7 +210,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                   (case when rp.RUN_DATE is null then 'PRELIMINARY' else 'FINAL' end) PANEL_STATUS ,
                   (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
                   tst.STORAGE_STABILITY,
-                  rp.STAT
+                  rp.STAT,
+                  coalesce( pnl.SORT_ID, 0) SORT_ID 
                 FROM req_panels rp   
                 INNER JOIN REQUISITIONS rq ON rq.acc_id = rp.acc_id 
                 INNER JOIN panels pnl ON rp.panel_id = pnl.panel_id 
@@ -236,13 +237,15 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     (case when rp.RUN_DATE is null then 'PRELIMINARY' else 'FINAL' end) PANEL_STATUS ,
                     (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
                     '' as STORAGE_STABILITY,
-                    rp.STAT
+                    rp.STAT,
+                    coalesce( pg.SORT_ID, 0) SORT_ID 
                 FROM RL_REQ_PANELS rp 
-                inner join requisitions rq on rq.acc_id = rp.acc_id
-                left outer join RL_RESULTS res on res.rp_id = rp.rp_id
+                INNER JOIN requisitions rq on rq.acc_id = rp.acc_id
+                LEFT OUTER JOIN RL_RESULTS res on res.rp_id = rp.rp_id
+                LEFT OUTER JOIN RL_PROFILES pg on pg.RL_ID = rp.RL_ID and pg.PROFILE_ID = rp.PROFILE_ID
                 WHERE rq.ACC_ID= @acc_id and rp.DEL_FLAG='F'
         )x
-        ORDER BY  panel_name ASC, test_id ASC, test_name ASC";
+        ORDER BY SORT_ID asc, panel_name ASC, test_id ASC, test_name ASC";
     }
 
 }
