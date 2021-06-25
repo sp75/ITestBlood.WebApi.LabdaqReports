@@ -22,9 +22,11 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
         }
         public List<PanelResultData> Get()
         {
-            var str = String.Format(SQL_GET_TEST_RESULTS, _pat_id);
-
-            return new Proc(str, "labdaq_mssql") { { "current_date", _current_date } }.All().Select(s => new PanelResultData
+            return new Proc(SQL_GET_TEST_RESULTS, "labdaq_mssql") {
+                { "pat_id", _pat_id },
+                { "current_date", _current_date }
+            }.All()
+            .Select(s => new PanelResultData
             {
                 PanelId = s["PANEL_ID"].ToString(),
                 CreatedDate = (DateTime)s["CREATED_DATE"],
@@ -71,7 +73,9 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 from RL_REQ_PANELS rp
                 inner join RL_RESULTS res on res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < @current_date 
+                inner join PATIENTS p on p.PAT_ID = rq.PAT_ID
+                cross join (select L_NAME, F_NAME, BIRTH from PATIENTS where PAT_ID  = @pat_id ) rq2
+                where rp.DEL_FLAG='F' and (UPPER( p.F_NAME) = UPPER (rq2.F_NAME) and UPPER(p.L_NAME) = UPPER(rq2.L_NAME) and p.BIRTH = rq2.BIRTH) and rp.CREATED_DATE < @current_date 
              
                 union all
                 select 
@@ -97,7 +101,9 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
                 inner join PANELS p on rp.PANEL_ID = p.PANEL_ID
                 inner join RESULTS res on  res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < @current_date   
+                inner join PATIENTS pat on pat.PAT_ID = rq.PAT_ID
+                cross join (select L_NAME, F_NAME, BIRTH from PATIENTS where PAT_ID  = @pat_id ) rq2
+                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and (UPPER( pat.F_NAME) = UPPER (rq2.F_NAME) and UPPER(pat.L_NAME) = UPPER(rq2.L_NAME) and pat.BIRTH = rq2.BIRTH) and rp.CREATED_DATE < @current_date   
             )x
             order by CREATED_DATE desc";
     }
