@@ -75,7 +75,9 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                 from RL_REQ_PANELS rp
                 inner join RL_RESULTS res on res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) 
+                inner join PATIENTS p on p.PAT_ID = rq.PAT_ID
+                cross join (select L_NAME, F_NAME, BIRTH from PATIENTS where PAT_ID  = '{0}' ) rq2
+                where rp.DEL_FLAG='F' and (UPPER( p.F_NAME) = UPPER (rq2.F_NAME) and UPPER(p.L_NAME) = UPPER(rq2.L_NAME) and p.BIRTH = rq2.BIRTH)  and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) 
              
                 union all
                 select 
@@ -101,7 +103,9 @@ namespace ITestBlood.WebApi.LabdaqReports.OracleImplementation
                 inner join PANELS p on rp.PANEL_ID = p.PANEL_ID
                 inner join RESULTS res on  res.rp_id = rp.rp_id and res.DEL_FLAG='F'
                 inner join REQUISITIONS rq on rq.ACC_ID = rp.ACC_ID
-                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and rq.PAT_ID= '{0}' and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' ) 
+                inner join PATIENTS pat on pat.PAT_ID = rq.PAT_ID
+                cross join (select L_NAME, F_NAME, BIRTH from PATIENTS where PAT_ID  = '{0}' ) rq2
+                where rp.DEL_FLAG='F' and res.DISPLAY_ON_REPORT = 'T'  and (UPPER( pat.F_NAME) = UPPER (rq2.F_NAME) and UPPER(pat.L_NAME) = UPPER(rq2.L_NAME) and pat.BIRTH = rq2.BIRTH) and rp.CREATED_DATE < TO_DATE( '{1}', 'mm/dd/yyyy HH24:MI:SS' )   
             )
             order by CREATED_DATE desc
           )";

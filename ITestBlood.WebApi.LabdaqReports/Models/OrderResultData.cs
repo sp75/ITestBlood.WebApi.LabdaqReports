@@ -28,5 +28,6 @@ namespace ITestBlood.WebApi.LabdaqReports.Models
         public int IsAllergen { get; set; }
         public string StorageStability { get; set; }
         public string STAT { get; set; }
+        public string PerfSiteId { get; set; }
     }
 }

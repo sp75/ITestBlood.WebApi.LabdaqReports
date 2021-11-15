@@ -27,6 +27,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Models
         public int IsPositive { get; set; }
         public DateTime? PrintedDate { get; set; }
         public string PanelName { get; set; }
+        public string CorrectedBy { get; set; }
     }
 
 }

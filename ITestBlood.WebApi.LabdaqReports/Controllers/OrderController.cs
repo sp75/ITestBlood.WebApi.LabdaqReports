@@ -101,6 +101,19 @@ namespace ITestBlood.WebApi.LabdaqReports.Controllers
             }
         }
 
+        [HttpGet, Route("ora/order-result/{acc_id}")]
+        public IHttpActionResult GetOrderResultFromOracl(int acc_id)
+        {
+            return Ok(new OrderReportOracleRepository(acc_id).GetOrderPanels());
+        }
+
+        [HttpGet, Route("ms/order-result/{acc_id}")]
+        public IHttpActionResult GetOrderResultFromMsSql(int acc_id)
+        {
+            return Ok(new OrderReportMsSqlRepository(acc_id).GetOrderPanelsMsSQL());
+        }
+
+
         [HttpPost, Route("order-status")]
         public IHttpActionResult GetOrderStatus(List<string> acc_ids)
         {

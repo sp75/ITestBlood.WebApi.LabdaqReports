@@ -1,17 +1,11 @@
 ﻿using Elf.Data;
-using ITestBlood.WebApi.LabdaqReports.LabdaqData;
 using ITestBlood.WebApi.LabdaqReports.Models;
 using ITestBlood.WebApi.LabdaqReports.MsSqlImplementation;
-using ITestBlood.WebApi.LabdaqReports.OracleImplementation;
 using ITestBlood.WebApi.LabdaqReports.Settings;
-using Labdaq;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ITestBlood.WebApi.LabdaqReports.Responses
 {
@@ -29,8 +23,10 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
             var order_info = new OrderInfoMsSQL(_acc_id).Get();
 
             var test_result = new TestResultsMsSql(_acc_id).Get();
+            var corrected_test_result = new CorrectedTestResultsMsSql(_acc_id).Get();
             var evetns = new TestEvensMsSql(_acc_id).Get();
-            var drugs = new MsSqlImplementation.DrugPanelsMsSql(_acc_id).Get();
+            var drugs = new DrugPanelsMsSql(_acc_id).Get();
+            var pref_site = new PrefSitesMsSql(_acc_id).Get();
 
             var proc = new Proc(sql, "labdaq_mssql") { { "acc_id", _acc_id } }.All();
 
@@ -53,7 +49,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 IsAllergen = new Regex(@"\[[A-Z]\d{1,3}\]").IsMatch(s["TEST_NAME"].ToString()) ? 1 : 0,
                 StorageStability = s["STORAGE_STABILITY"].ToString(),
                 STAT = s["STAT"].ToString(),
-                RunDate = s["RUN_DATE"] != DBNull.Value ? (DateTime?)s["RUN_DATE"] : null
+                RunDate = s["RUN_DATE"] != DBNull.Value ? (DateTime?)s["RUN_DATE"] : null,
+                PerfSiteId = s["PERF_SITE_ID"].ToString()
             }).ToList().ForEach(item =>
             {
                 if (!lab_result.Any(a=> a.TestId == item.TestId  && a.PanelType == item.PanelType) /*Select(s => s.TestId).Contains(item.TestId)*/)
@@ -74,7 +71,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 g.PanelNotes,
                 g.AddedAfterPrint,
                 g.CreatedDate,
-                g.STAT
+                g.STAT,
+                g.PerfSiteId
             }).Select(s => new
             {
                 s.Key.PanelId,
@@ -88,6 +86,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 s.Key.CreatedDate,
                 s.Key.STAT,
                 PrevResultDates = prev_result.Where(w => w.PanelId == s.Key.PanelId).OrderByDescending(o => o.CreatedDate).Select(ps => ps.CreatedDate).Distinct().Take(6),
+                PerfSite = pref_site.FirstOrDefault(w=> w.PerfSiteId == s.Key.PerfSiteId),
                 Tests = s.Select(t => new
                 {
                     t.TestId,
@@ -99,6 +98,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     t.StorageStability,
                     TestResultType = t.TestResultType == "N" ? "numeric" : (t.TestResultType == "A" ? "alphanumeric" : ""),
                     t.RunDate,
+                    t.AlphaRangeText,
                     Results = new
                     {
                         Current = test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
@@ -123,6 +123,30 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                             IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1,
                             r.ResultTranslation
                         }).FirstOrDefault(),
+
+                        Corrected = corrected_test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
+                        {
+                            r.RpId, 
+                            r.CreatedDate,
+                            r.ResultNumeric,
+                            r.Flag,
+                            r.Units,
+                            CutOff = r.HighOrSd != null ? Math.Round(r.HighOrSd.Value) : 0,
+                            r.HighOrSd,
+                            r.IsPositive,
+                            AllergenLevel = t.IsAllergen == 1 ? Helper.GetAllergenLevel(r.ResultNumeric) : null,
+                            AllergenLevelPercent = t.IsAllergen == 1 ? (int?)Convert.ToInt32((100 * r.ResultNumeric) / Helper.GetLessByLevel(r.ResultNumeric)) : null,
+                            IsAbnormalFlag = (String.IsNullOrEmpty(r.Flag) || r.Flag == "N" ? 0 : 1),
+                            ResultType = Helper.GetResultType(r.Flag),
+                            r.ResultCodeText,
+                            r.ResultAlpha,
+                            Result = Helper.GetResult(evetns.Where(ev => ev.TestId == t.TestId).ToList(), r, t),
+                            Outcome = new string[] { "S", "D" }.Contains(s.Key.PanelType) ? (r.IsPositive == 1 ? "POSITIVE" : "NEGATIVE") : "",
+                            IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1,
+                            r.ResultTranslation,
+                            r.CorrectedBy
+                        }).FirstOrDefault(),
+
                         Previous = prev_result.Where(w => w.TestId == t.TestId ).Select(r => new
                         {
                             r.AccId,
@@ -211,7 +235,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                   (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
                   tst.STORAGE_STABILITY,
                   rp.STAT,
-                  coalesce( pnl.SORT_ID, 0) SORT_ID 
+                  coalesce( pnl.SORT_ID, 0) SORT_ID ,
+				  null PERF_SITE_ID 
                 FROM req_panels rp   
                 INNER JOIN REQUISITIONS rq ON rq.acc_id = rp.acc_id 
                 INNER JOIN panels pnl ON rp.panel_id = pnl.panel_id 
@@ -238,7 +263,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                     (case when rp.CREATED_DATE > rq.PRINTED_DATE then 'T' else 'F' end) ADDED_AFTER_PRINT,
                     '' as STORAGE_STABILITY,
                     rp.STAT,
-                    coalesce( pg.SORT_ID, 0) SORT_ID 
+                    coalesce( pg.SORT_ID, 0) SORT_ID,
+					rp.PERF_SITE_ID
                 FROM RL_REQ_PANELS rp 
                 INNER JOIN requisitions rq on rq.acc_id = rp.acc_id
                 LEFT OUTER JOIN RL_RESULTS res on res.rp_id = rp.rp_id

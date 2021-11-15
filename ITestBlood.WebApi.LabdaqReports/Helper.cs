@@ -244,7 +244,7 @@ namespace ITestBlood.WebApi.LabdaqReports
         {
             var result_type = reader.TestResultType.ToLowerInvariant();
             string reference;
-            if ("a" == result_type || "m" == result_type)
+            if ("a" == result_type || "m" == result_type || string.IsNullOrEmpty(result_type) )
             {
                 reference = reader.AlphaRangeText ?? "";
             }

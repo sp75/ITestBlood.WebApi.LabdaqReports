@@ -35,6 +35,7 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                 };
 
                 var test_result = new TestResults(lab, _acc_id).Get();
+                var corrected_test_result = new CorrectedTestResults(lab,_acc_id).Get();
                 var evetns = new TestEvens(lab, _acc_id).Get();
                 var drugs = new DrugPanels(_acc_id).Get();
 
@@ -91,6 +92,8 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                         t.IsAllergen,
                         t.StorageStability,
                         TestResultType = t.TestResultType == "N" ? "numeric" : (t.TestResultType == "A" ? "alphanumeric" : ""),
+                        t.RunDate,
+                        t.AlphaRangeText,
                         Results = new
                         {
                             Current = test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
@@ -115,6 +118,30 @@ namespace ITestBlood.WebApi.LabdaqReports.Responses
                                     IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1,
                                     r.ResultTranslation
                             }).FirstOrDefault(),
+
+                            Corrected = corrected_test_result.Where(w => w.PanelId == s.Key.PanelId && w.TestId == t.TestId).Select(r => new
+                            {
+                                r.RpId,
+                                r.CreatedDate,
+                                r.ResultNumeric,
+                                r.Flag,
+                                r.Units,
+                                CutOff = r.HighOrSd != null ? Math.Round(r.HighOrSd.Value) : 0,
+                                r.HighOrSd,
+                                r.IsPositive,
+                                AllergenLevel = t.IsAllergen == 1 ? Helper.GetAllergenLevel(r.ResultNumeric) : null,
+                                AllergenLevelPercent = t.IsAllergen == 1 ? (int?)Convert.ToInt32((100 * r.ResultNumeric) / Helper.GetLessByLevel(r.ResultNumeric)) : null,
+                                IsAbnormalFlag = (String.IsNullOrEmpty(r.Flag) || r.Flag == "N" ? 0 : 1),
+                                ResultType = Helper.GetResultType(r.Flag),
+                                r.ResultCodeText,
+                                r.ResultAlpha,
+                                Result = Helper.GetResult(evetns.Where(ev => ev.TestId == t.TestId).ToList(), r, t),
+                                Outcome = new string[] { "S", "D" }.Contains(s.Key.PanelType) ? (r.IsPositive == 1 ? "POSITIVE" : "NEGATIVE") : "",
+                                IsInconsistentResult = (drugs.Consistent.Any(a => a.TestId == t.TestId) || (!drugs.Inconsistent1.Any(a => a.TestId == t.TestId) && r.ResultNumeric <= r.HighOrSd)) ? 0 : 1,
+                                r.ResultTranslation,
+                                r.CorrectedBy
+                            }).FirstOrDefault(),
+
                             Previous =/* new PreviousResults(order_info.PatId, s.Key.CreatedDate, t.TestId).Get()*/prev_result.Where(w=> w.TestId == t.TestId && w.PanelId == t.PanelId).Select(r => new
                             {
                                 r.AccId,

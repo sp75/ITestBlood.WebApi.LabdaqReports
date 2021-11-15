@@ -18,10 +18,6 @@ namespace ITestBlood.WebApi.LabdaqReports.MsSqlImplementation
 
         public JsonTable Get()
         {
-            var args = new Dictionary<string, object> {
-                    { "acc_id", _acc_id}
-                };
-
             return new Proc(SQL_GET_TEST_RESULTS, "labdaq_mssql") { { "acc_id", _acc_id } }.All();
         }
 

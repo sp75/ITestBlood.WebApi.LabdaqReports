@@ -166,9 +166,11 @@
     <Compile Include="MsSqlImplementation\DrugPanelsMsSql.cs" />
     <Compile Include="MsSqlImplementation\OrderInfoMsSQL.cs" />
     <Compile Include="MsSqlImplementation\OrderStatusMsSql.cs" />
+    <Compile Include="MsSqlImplementation\PrefSitesMsSql.cs" />
     <Compile Include="MsSqlImplementation\PreviousResultsMsSql.cs" />
     <Compile Include="MsSqlImplementation\PriorHistoryTestsMsSql.cs" />
     <Compile Include="MsSqlImplementation\TestEvensMsSql.cs" />
+    <Compile Include="MsSqlImplementation\CorrectedTestResultsMsSql.cs" />
     <Compile Include="MsSqlImplementation\TestResultsMsSql.cs" />
     <Compile Include="OracleImplementation\DrugPanels.cs" />
     <Compile Include="OracleImplementation\OrderInfo.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="OracleImplementation\PreviousResults.cs" />
     <Compile Include="OracleImplementation\PriorHistoryTests.cs" />
     <Compile Include="OracleImplementation\TestEvens.cs" />
+    <Compile Include="OracleImplementation\CorrectedTestResults.cs" />
     <Compile Include="OracleImplementation\TestResults.cs" />
     <Compile Include="Responses\OrderReportOracleRepository.cs" />
     <Compile Include="Responses\OrderReportMsSqlRepository.cs" />
